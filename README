@@ -1,0 +1,5 @@
+**** NOTE ****
+There's a bug I have to fix where you must place all the files in the /tmp/ folder and run it as 
+$python /tmp/replicator.py username.txt password.txt
+
+I want to be able to run it from inside a directory, and without the /tmp/ prefix
