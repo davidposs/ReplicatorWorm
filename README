@@ -1,9 +1,10 @@
 CPSC 456 Project 1: Relicator Worm
-	
-	Members: David Poss, Gerard Cortes, Billy Dang
 
-	Usage: $python replicator.py <username file> <password file>
+Members: David Poss, Gerard Cortes, Billy Dang
 
-	Notes: The worm will leave a marker "gotcha.txt" file that says which IP infected that machine. Also, 
-               run the script with all files (worm, username and password files) in the same directory.
+Usage: $python replicator.py <username file> <password file>
 
+Notes: 
+1. The worm will leave a marker "gotcha.txt" file that says which IP infected that machine.
+2. Run the script with all files (worm, username and password files) in the same directory.
+3. The worm only checks the target directory (by default /home/<cracked username>) on the remote system for the worm, so if you launch the worm from a directory other than the target directory (like launching it from /tmp/ but specifying the target directory as /home/cpsc), the initial system be infected as well unless the worm is in its /home/<cracked username> directory.
